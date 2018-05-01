@@ -15,34 +15,78 @@ const weatherColorMap = {
   'snow': '#aae1fc'
 }
 
+const MapWX = require('../../libs/qqmap-wx-jssdk.js')
+
+const UNPROMPTED = 0
+const UNAUTHORIZED = 1
+const AUTHORIZED = 2
+
 Page({
   data: {
     tempNow: '',
     weatherNow: '',
     weatherBackgroundNow: '',
-    forecastHourly: []
+    forecastHourly: [],
+    tempToday: '',
+    dateToday: '',
+    city: '广州市',
+    locationAuthType: UNPROMPTED,
   },
   onLoad() {
-    this.getNow()
+    this.mapsdk = new MapWX({
+      key: '7RIBZ-EAYKK-DAGJR-ASYVE-DDYVH-CTFNO'
+    }),
+    wx.getSetting({
+      success: res => {
+        let auth = res.authSetting['scope.userLocation']
+        this.setData({
+          locationAuthType: auth ? AUTHORIZED :
+            (auth === false) ? UNAUTHORIZED : UNPROMPTED
+        })
+        if (auth)
+          this.getLocationAndWeather()
+        else
+          this.getNow()
+      }
+    })
   },
   onPullDownRefresh() {
     this.getNow(() => {
       wx.stopPullDownRefresh()
     })
   },
+  onTapDayWeather() {
+    wx.navigateTo({
+      url: '/pages/list/list?city=' + this.data.city
+    })
+  },
+  onTapLocation() {
+    if (this.data.locationAuthType === UNAUTHORIZED)
+      wx.openSetting({
+        success: res => {
+          let auth = res.authSetting['scope.userLocation']
+          if (auth) {
+            this.getLocationAndWeather()
+          }
+        }
+      })
+    else
+      this.getLocationAndWeather()
+  },
   getNow(callback) {
     wx.request({
-      complete: () => {
-        callback && callback()
-      },
       url: 'https://test-miniprogram.com/api/weather/now',
       data: {
-        city: '北京市'
+        city: this.data.city
       },
       success: res => {
         let result = res.data.result;
         this.setNow(result)
         this.setForecastHourly(result)
+        this.setToday(result)
+      },
+      complete: () => {
+        callback && callback()
       }
     })
   },
@@ -74,5 +118,40 @@ Page({
     this.setData({
       forecastHourly: forecastNow
     })
+  },
+  setToday(result) {
+    let date = new Date()
+    this.setData({
+      tempToday: `${result.today.minTemp}° - ${result.today.maxTemp}°`,
+      dateToday: `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} 今天`
+    })
+  },
+  getLocationAndWeather() {
+    wx.getLocation({
+      success: res => {
+        this.setData({
+          locationAuthType: AUTHORIZED,
+        })
+        this.mapsdk.reverseGeocoder({
+          location: {
+            latitude: res.latitude,
+            longitude: res.longitude
+          },
+          success: res => {
+            let city = res.result.address_component.city
+            this.setData({
+              city: city
+            })
+            this.getNow()
+          }
+        })
+      },
+      fail: () => {
+        this.setData({
+          locationAuthType: UNAUTHORIZED,
+        })
+      }
+    })
+    
   }
 })

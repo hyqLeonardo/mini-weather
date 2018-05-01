@@ -2,7 +2,7 @@
 760=174+280+56+250*/
 .weather-wrapper{
   position: relative;
-  padding-top: 174rpx;
+  padding-top: 20rpx;
   padding-bottom: 250rpx;
 }
 
@@ -76,4 +76,58 @@
 .forecast-temp {
   font-size: 40rpx;
   line-height: 56rpx
+}
+
+.day-weather {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  bottom:0;
+  left: 40rpx;
+  right: 40rpx;
+  height: 90rpx;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 30rpx;
+  line-height: 42rpx;
+  color: rgba(0, 0, 0, 0.5)
+}
+
+.temp-text {
+  flex-grow: 1;
+  padding-right: 30rpx;
+  text-align: right;
+}
+
+.arrow-icon {
+  width: 21rpx;
+  height: 30rpx;
+}
+
+.location-wrapper {
+  margin-bottom: 60rpx;
+  font-size: 30rpx;
+  line-height: 42rpx;
+}
+
+.location {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.location-icon {
+  width: 30rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
+}
+
+.location-text {
+  opacity: 0.5;
+}
+
+.location-tip {
+  text-align: center;
+  margin-top: 10rpx;
+  opacity: 0.5;
+  height: 42rpx;
 }
